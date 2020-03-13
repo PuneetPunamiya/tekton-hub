@@ -16,7 +16,7 @@ import {
   Card,
 } from '@patternfly/react-core';
 import {fetchTaskSuccess} from '../redux/Actions/TaskAction';
-import {fetchTaskName} from '../redux/Actions/TaskActionName';
+import {fetchTaskSuccessDummy} from '../redux/Actions/TaskActionDummy';
 import store from '../redux/store';
 export interface TaskPropData {
   id: number;
@@ -36,6 +36,7 @@ const SearchBar: React.FC = (props: any) => {
   const tempTask: any = [];
   React.useEffect(() => {
     props.fetchTaskSuccess();
+    props.fetchTaskSuccessDummy();
     // eslint-disable-next-line
   }, []);
 
@@ -120,31 +121,45 @@ const SearchBar: React.FC = (props: any) => {
     setTasks(tasks);
 
     const regex: any = [];
-    let data: any;
     if (props.TaskData != null) {
       for (let i = 0; i < tempArr.length; i++) {
         regex.push(tempArr[i].name);
         if (tasks.toLocaleLowerCase() === regex[i]) {
-          data = tasks.toLocaleLowerCase;
-        }
-        if (data != null) {
           tempTask.push(tempArr[i]);
         }
       }
     }
 
     if (tempTask.length > 0) {
-      store.dispatch({type: 'FETCH_TASK_NAME', payload: tempTask[0]});
+      store.dispatch({type: 'FETCH_TASK_SUCCESS', payload: tempTask});
     }
   };
 
-  const taskNameArr: any = [];
-  if (props.TaskData != null) {
-    for (let i = 0; i < tempArr.length; i++) {
-      taskNameArr.push(tempArr[i].name);
-    }
+  let suggestionArr;
+  if (props.TaskDataDummy) {
+    suggestionArr = props.TaskDataDummy.map((task: any) => {
+      const taskData: TaskPropData = {
+        id: task.id,
+        name: task.name,
+        description: task.description,
+        rating: task.rating,
+        downloads: task.downloads,
+        yaml: task.yaml,
+        tags: task.tags,
+        verified: task.verified,
+        type: task.type,
+      };
+      return taskData;
+    });
   }
 
+  // get all the data from dummy object
+  const taskNameArr: any = [];
+  if (props.TaskDataDummy) {
+    for (let i = 0; i < suggestionArr.length; i++) {
+      taskNameArr.push(suggestionArr[i].name);
+    }
+  }
 
   // AutoComplete text while searching a task
   const [suggestions, setState] = React.useState([]);
@@ -227,8 +242,9 @@ const SearchBar: React.FC = (props: any) => {
 
 const mapStateToProps = (state: any) => ({
   TaskData: state.TaskData.TaskData,
+  TaskDataDummy: state.TaskDataDummy.TaskDataDummy,
 });
 
-export default connect(mapStateToProps, {fetchTaskSuccess, fetchTaskName})(SearchBar);
+export default connect(mapStateToProps, {fetchTaskSuccess, fetchTaskSuccessDummy})(SearchBar);
 
 

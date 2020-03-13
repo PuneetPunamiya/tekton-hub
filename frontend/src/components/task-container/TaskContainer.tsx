@@ -30,32 +30,25 @@ const TaskContainer: React.FC = (props: any) => {
   // eslint-disable-next-line
   }, []);
 
-  if (props.TaskName != null) {
-    for (let i = 0; i < props.TaskData.length; i++) {
-      if (props.TaskName['id'] === props.TaskData[i]['id']) {
-        tempArr.push(props.TaskData[i]);
-      }
-    }
-  } else {
-    if (props.TaskData != null) {
-      tempArr = props.TaskData;
+  if (props.TaskData != null) {
+    tempArr = props.TaskData;
 
-      if (tempArr.length === 0) {
-        return (
+    if (tempArr.length === 0) {
+      return (
 
-          <div style = {{top: '50em',
-            bottom: '50em', right: '50em', marginLeft: '45em'}}>
-            <EmptyState variant={EmptyStateVariant.full}>
-              <EmptyStateIcon icon={CubesIcon} />
-              <EmptyStateBody>
+        <div style = {{top: '50em',
+          bottom: '50em', right: '50em', marginLeft: '45em'}}>
+          <EmptyState variant={EmptyStateVariant.full}>
+            <EmptyStateIcon icon={CubesIcon} />
+            <EmptyStateBody>
           No match found.
-              </EmptyStateBody>
-            </EmptyState>
-          </div>
-        );
-      }
+            </EmptyStateBody>
+          </EmptyState>
+        </div>
+      );
     }
   }
+
 
   if (props.TaskData === undefined) {
     return (
