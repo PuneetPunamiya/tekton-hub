@@ -6,9 +6,12 @@ import (
 	"log"
 	"os"
 	"strings"
+	"golang.org/x/oauth2"
+	"context"
 
 	"github.com/google/go-github/github"
 	"github.com/redhat-developer/tekton-hub/backend/api/pkg/app"
+	"github.com/redhat-developer/tekton-hub/backend/api/pkg/polling"
 
 	// Blank for package side effect
 	_ "github.com/lib/pq"
@@ -24,7 +27,7 @@ func Connect(app app.Config) error {
 	conn := app.Database().ConnectionString()
 
 	log.Debugf("connecting to db: %s", conn)
-	db, err := sql.Open("postgres", conn)
+	db, err := sql.Open("postgres", "user=postgres password=postgres dbname=tekton_hub sslmode=disable")
 	if err != nil {
 		return err
 	}
@@ -62,6 +65,44 @@ func extractDescriptionFromREADME(readmeFile *github.RepositoryContent, dir *git
 		log.Fatal(err)
 	}
 	return description
+}
+
+//AddResourcesFromCatalog : will add contents from Github catalog
+func AddResourcesFromCatalog(owner string, repositoryName string) {
+
+	token := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: ""})
+	client := oauth2.NewClient(context.Background(), token)
+	Client := github.NewClient(client)
+
+	log.Println("Getting catalog contents")
+	repoContents, err := polling.GetDirContents(context.Background(), Client, owner, repositoryName, "", nil)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, dir := range repoContents {
+		if dir.GetType() == "dir" && dir.GetName() != "vendor" && dir.GetName() != "test" && dir.GetName() != ".github" {
+			d, err := polling.GetDirContents(context.Background(), Client, owner, repositoryName, dir.GetName(), nil)
+			if err != nil {
+				log.Println(err)
+			}
+
+			// Iterate over all files in directory and check for yaml and readme
+			for _, file := range d {
+				resourcePath := dir.GetName() + "/" + file.GetName()
+				if strings.HasSuffix(file.GetName(), ".yaml") {
+					// Store the path of file
+					log.Println("Resource Path", resourcePath)
+
+				} else if strings.HasSuffix(file.GetName(), ".md") {
+					// Store the path of README file
+					log.Println(dir.GetName() + " " + file.GetName())
+
+				}
+			}
+		}
+	}
 }
 
 // AddResourcesFromCatalog will add contents from Github catalog to database

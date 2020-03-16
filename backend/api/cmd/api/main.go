@@ -28,7 +28,7 @@ func main() {
 	defer models.DB.Close()
 
 	router := mux.NewRouter()
-	// models.AddResourcesFromCatalog("tektoncd", "catalog")
+	models.AddResourcesFromCatalog("PuneetPunamiya", "catalog")
 	routes.Register(router, app)
 
 	cors := handlers.CORS(
