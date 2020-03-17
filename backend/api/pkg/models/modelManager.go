@@ -27,7 +27,7 @@ func Connect(app app.Config) error {
 	conn := app.Database().ConnectionString()
 
 	log.Debugf("connecting to db: %s", conn)
-	db, err := sql.Open("postgres", "user=postgres password=postgres dbname=tekton_hub sslmode=disable")
+	db, err := sql.Open("postgres", "user=postgres password=postgres dbname=tekton_hub sslmode=disable") // Putting the values for developing locally
 	if err != nil {
 		return err
 	}
@@ -70,6 +70,7 @@ func extractDescriptionFromREADME(readmeFile *github.RepositoryContent, dir *git
 //AddResourcesFromCatalog : will add contents from Github catalog
 func AddResourcesFromCatalog(owner string, repositoryName string) {
 
+	// Using the github token instead of importing it from env for developing the code locally
 	token := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: ""})
 	client := oauth2.NewClient(context.Background(), token)
 	Client := github.NewClient(client)
